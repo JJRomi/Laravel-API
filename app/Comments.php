@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comments extends Model
 {
+    public $timestamps = false;
+
+    protected $visible = [
+        'id',
+        'contents',
+        'insert_dt',
+        'child',
+    ];
+
     protected $fillable = [
         'parent_id',
         'target_table',

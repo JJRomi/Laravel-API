@@ -4,82 +4,50 @@ namespace App\Http\Controllers;
 
 use App\Comments;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class CommentsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(Request $request, $target_table, $target_id)
     {
-        //
+        $comments = Comments::where([
+                                  ['target_table', $target_table],
+                                  ['target_id', $target_id],
+                                  ['parent_id', null],
+                              ])->with('child')->paginate(5);
+
+        return response()->json($comments, 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function store(Request $request, $target_table, $target_id)
     {
-        //
+        try{
+          $comments = Comments::create([
+              'target_table' => $target_table,
+              'target_id' => $target_id,
+              'contents' => $request->input('contents', null),
+              'insert_dt' => Carbon::now()->toDateTimeString(),
+          ]);
+        }catch(Exception $e){
+            return response()->json($e);
+        }
+        return response()->json(200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function recommentsStore(Request $request, $comments_id)
     {
-        //
-    }
+        $parent_comments = Comments::findOrFail($comments_id);
+        try{
+          $recomments = Comments::create([
+              'parent_id' => $parent_comments->id,
+              'target_table' => $parent_comments->target_table,
+              'target_id' => $parent_comments->target_id,
+              'contents' => $request->input('contents', null),
+          ]);
+        }catch(Exception $e){
+            return response()->json($e);
+        }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Comments  $comments
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Comments $comments)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Comments  $comments
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Comments $comments)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Comments  $comments
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Comments $comments)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Comments  $comments
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Comments $comments)
-    {
-        //
+        return response()->json(200);
     }
 }

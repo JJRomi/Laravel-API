@@ -1,7 +1,7 @@
 # Laravel API
 ## How to Install
 ```
-git clone https://github.com/JJRomi/mylo-recruit.git
+git clone https://github.com/JJRomi/test.git
 cd mylo-recruit
 cp .env.example .env // env파일에 해당 db정보 입력
 composer install
